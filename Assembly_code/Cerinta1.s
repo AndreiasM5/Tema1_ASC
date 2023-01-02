@@ -145,11 +145,51 @@ xor     %edi, %edi
 lea     -12(%ebp), %eax                     # pun in %eax adresa de inceput a vectorului "plm"
 
 for1:
+
+    pushl   %eax                      # am pus toti registrii pe stiva ca sa fac scriere
+    pushl   %ebx
+    pushl   %ecx
+    pushl   %edx
+
+    xor     %ecx, %ecx
+    movl    %ebx, %ecx
+    pushl   %ecx                      # printez contorul ebx din primul for
+    pushl   $printfor1
+    call    printf
+    popl    %ebx
+    popl    %ebx
+    pushl   $0
+    call    fflush
+    popl    %ebx
+    
+    popl    %edx                     # iau registrii de pe stiva dupa scriere
+    popl    %ecx
+    popl    %ebx
+    popl    %eax
+
     cmp     %ebx, -8(%ebp)                  # compar contorul ebx cu nr de noduri
     je      end_for1
 
     xor     %ecx, %ecx
 for2:
+
+    pushl   %eax                            # am pus toti registrii pe stiva ca sa fac scriere
+    pushl   %ebx
+    pushl   %ecx
+    pushl   %edx
+    pushl   %ecx                            # printez ecx
+    pushl   $printfor2
+    call    printf
+    popl    %ebx
+    popl    %ebx
+    pushl   $0
+    call    fflush
+    popl    %ebx
+    popl    %edx                            # iau registrii de pe stiva dupa scriere
+    popl    %ecx
+    popl    %ebx
+    popl    %eax
+    
     pushl   %ebx                            # am pus toti registrii pe stiva ca sa fac calculul
     pushl   %ecx
     pushl   %edx
@@ -199,23 +239,6 @@ for2:
     popl    %ebx
     popl    %eax
 
-    pushl   %eax                            # am pus toti registrii pe stiva ca sa fac scriere
-    pushl   %ebx
-    pushl   %ecx
-    pushl   %edx
-    pushl   %ecx                            # printez ecx
-    pushl   $printfor2
-    call    printf
-    popl    %ebx
-    popl    %ebx
-    pushl   $0
-    call    fflush
-    popl    %ebx
-    popl    %edx                            # iau registrii de pe stiva dupa scriere
-    popl    %ecx
-    popl    %ebx
-    popl    %eax
-
     # aloc memorie pe stiva
     subl    $4, %esp                        # eax asta nu are treaba cu eax de sus 
     movl    x, %eax                         # o sa pun de data asta valoarea in eax ca de restul parametrilor am nevoie
@@ -245,27 +268,6 @@ for2:
     jmp     for2
 
 end_for2:
-    pushl   %eax                      # am pus toti registrii pe stiva ca sa fac scriere
-    pushl   %ebx
-    pushl   %ecx
-    pushl   %edx
-
-    xor     %ecx, %ecx
-    movl    %ebx, %ecx
-    pushl   %ecx                      # printez contorul ebx din primul for
-    pushl   $printfor1
-    call    printf
-    popl    %ebx
-    popl    %ebx
-    pushl   $0
-    call    fflush
-    popl    %ebx
-    
-    popl    %edx                     # iau registrii de pe stiva dupa scriere
-    popl    %ecx
-    popl    %ebx
-    popl    %eax
-    
     add     $1, %ebx                 # incrementez iteratorul
     jmp     for1
 
