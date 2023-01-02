@@ -3,7 +3,7 @@
     printEbx: .asciz "contorul EBX este = %d\n"
     formatString: .asciz "%d"
     errorPrintf: .asciz "Contorul meu edx este = %d\n"
-    printfor1: .asciz "Sunt in for 1 cu ebx = %d\n"
+    printfor1: .asciz "Contorul ebx pt for1 este = %d\n"
     printfor2: .asciz "Sunt in for 2 cu ecx = %d\n"
     printedi: .asciz "Edi este egal cu %d\n"
     printadresainceputvector: .asciz "inceputul este egal cu %d si ar trebuie sa fie 2.\n"
@@ -57,7 +57,6 @@ iteratie:
     cmp %edx, -8(%ebp)          # conditie de iteratie
     je  end_iteratie
     
-
     pushl   %edx                # pun pe stiva ca se fute
 
     pushl   $x                  # pun parametrii ca sa apelez scanf
@@ -153,69 +152,51 @@ end_iteratie:
 # ecx contorul pt for2
 # edx contorul pt adautare de elemente
 
-xor %eax, %eax
-xor %ebx, %ebx
-xor %ecx, %ecx
-xor %edx, %edx
+xor     %eax, %eax
+xor     %ebx, %ebx
+xor     %ecx, %ecx
+xor     %edx, %edx
+xor     %edi, %edi
 
-lea -12(%ebp), %eax         # pun in %eax adresa de inceput a vectorului "plm"
+lea     -12(%ebp), %eax         # pun in %eax adresa de inceput a vectorului "plm"
 
 for1:
+    cmp     %ebx, -8(%ebp)      # compar contorul ebx cu nr de noduri
+    je      end_for1
 
-    cmp %ebx, -8(%ebp)      # compar contorul ebx cu nr de noduri
-    je end_for1
-
-    
-    pushl %eax                      # am pus toti registrii pe stiva ca sa fac scriere
-    pushl %ebx
-    pushl %ecx
-    pushl %edx
-
-    xor %ecx, %ecx
-    movl %ebx, %ecx
-    pushl %ecx                      # printez contorul ebx din primul for
-    pushl $printfor1
-    call printf
-    popl %ebx
-    popl %ebx
-    pushl $0
-    call fflush
-    popl %ebx
-
-    
-    popl    %edx                     # iau registrii de pe stiva dupa scriere
-    popl    %ecx
-    popl    %ebx
-    popl    %eax
-
+    xor     %ecx, %ecx
 for2:
+    #
+    pushl   %eax                      # am pus toti registrii pe stiva ca sa fac scriere
+    pushl   %ebx
+    pushl   %ecx
+    pushl   %edx
+    #
 
-    
-    pushl %eax                      # am pus toti registrii pe stiva ca sa fac scriere
-    pushl %ebx
-    pushl %ecx
-    pushl %edx
-
-
-    pushl %ecx                      # printez ecx
-    pushl $printfor2
-    call printf
-    popl %ebx
-    popl %ebx
-    pushl $0
-    call fflush
-    popl %ebx
-
+    #
+    pushl   %ecx                      # printez ecx
+    pushl   $printfor2
+    call    printf
+    popl    %ebx
+    popl    %ebx
+    pushl   $0
+    call    fflush
+    popl    %ebx
+    #
    
+   #
     popl    %edx                     # iau registrii de pe stiva dupa scriere
     popl    %ecx
     popl    %ebx
     popl    %eax
+    #
 
+    #
     pushl %eax                      # am pus toti registrii pe stiva ca sa fac calculul
     pushl %ebx
     pushl %ecx
     pushl %edx
+    #
 
     lea     -12(%ebp), %ecx              # pun in ecx adresa de inceput a vectorului
     xor     %eax, %eax
@@ -226,43 +207,51 @@ for2:
     subl    %eax, %ecx
     movl    (%ecx), %edi              # teoretic ar trb ca in edi sa am (%ecx - 4 * %ebx)
 
+    #
     popl    %edx                     # iau registrii de pe stiva
     popl    %ecx
     popl    %ebx
     popl    %eax
+    #
 
-    pushl %edi
-    pushl %eax                      # am pus toti registrii pe stiva ca sa fac scriere si edi
-    pushl %ebx
-    pushl %ecx
-    pushl %edx
+    #
+    pushl   %edi
+    pushl   %eax                      # am pus toti registrii pe stiva ca sa fac scriere si edi
+    pushl   %ebx
+    pushl   %ecx
+    pushl   %edx
+    #
 
-    xor %ecx, %ecx
-    movl %edi, %ecx
-    pushl %ecx                   # printez edi
-    pushl $printedi
-    call printf
-    popl %ebx
-    popl %ebx
-    pushl $0
-    call fflush
-    popl %ebx
-
+    #
+    xor     %ecx, %ecx
+    movl    %edi, %ecx
+    pushl   %ecx                   # printez edi
+    pushl   $printedi
+    call    printf
+    popl    %ebx
+    popl    %ebx
+    pushl   $0
+    call    fflush
+    popl    %ebx
+    #
    
+    #
     popl    %edx                     # iau registrii de pe stiva dupa scriere si edi
     popl    %ecx
     popl    %ebx
     popl    %eax
     popl    %edi
+    #
 
     cmp     %ecx, %edi            # compar contorul ecx cu elementul[ebx] din vector <=> (%eax - 4 * ebx)
     je      end_for2
 
-    # sa pun pe stiva tot ca se fute
-    pushl %eax
+    #
+    pushl %eax                      # sa pun pe stiva tot ca se fute
     pushl %ebx
     pushl %ecx
     pushl %edx
+    #
 
     pushl   $x                 # pun parametrii ca sa apelez scanf
     pushl   $formatString
@@ -270,14 +259,17 @@ for2:
     popl    %ebx
     popl    %ebx
 
-    # aloc memorie pe stiva
-    subl    $4, %esp
-    movl    x, %edi             # o sa pun de data asta valoarea in edi ca de restul parametrilor am nevoie
 
     popl    %edx                     # iau registrii de pe stiva
     popl    %ecx
     popl    %ebx
     popl    %eax
+
+    # aloc memorie pe stiva
+    subl    $4, %esp                # edi asta nu are treaba cu edi de sus 
+    movl    x, %edi                 # o sa pun de data asta valoarea in edi ca de restul parametrilor am nevoie
+
+
 
     # sa pun pe stiva tot ca se fute
     pushl %eax
@@ -296,7 +288,8 @@ for2:
     # %eax - -8(%ebp) * 4 - 4 * edx 
     # %eax - -8(%ebp) * 4 - esi
     # %eax - ebx - esi
-
+    
+    lea     -12(%ebp), %eax
     movl    %edx, %esi
     shl     $2, %esi
     movl    -8(%ebp), %ebx
@@ -304,10 +297,8 @@ for2:
     subl    %eax, %ebx
     subl    %eax, %esi              # carnatul se afla in eax
 
-    movl    %edi, %eax
+    movl    %edi, (%eax)             # la adresa cu paranteze sau fara?
 
-
-    # TODO
    
 
     popl    %edx                     # iau registrii de pe stiva
@@ -317,10 +308,37 @@ for2:
 
     add     $1, %edx                # incrementez iteratorul
     add     $1, %ecx                # incrementez iteratorul
+
     jmp     for2
 
 end_for2:
 
+    #
+    pushl   %eax                      # am pus toti registrii pe stiva ca sa fac scriere
+    pushl   %ebx
+    pushl   %ecx
+    pushl   %edx
+    #
+
+    #
+    xor     %ecx, %ecx
+    movl    %ebx, %ecx
+    pushl   %ecx                      # printez contorul ebx din primul for
+    pushl   $printfor1
+    call    printf
+    popl    %ebx
+    popl    %ebx
+    pushl   $0
+    call    fflush
+    popl    %ebx
+    #
+    
+    #
+    popl    %edx                     # iau registrii de pe stiva dupa scriere
+    popl    %ecx
+    popl    %ebx
+    popl    %eax
+    #
     add     $1, %ebx                # incrementez iteratorul
     jmp     for1
 
