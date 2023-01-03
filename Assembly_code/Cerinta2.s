@@ -4,25 +4,24 @@ y: .long 3
 s: .space 4
 .text
 
-add:
-pushl %ebp
-mov %esp, %ebp
-movl 8(%ebp), %eax
-addl 12(%ebp), %eax
-movl 16(%ebp),%ebx
-movl %eax, 0(%ebx)
-popl %ebp
+add_a_b:
+
+add %ebx, %eax
+
 ret
+
+
+
 .global main
 main:
-pushl $s
-pushl y
+movl $4, %eax
+movl $5, %ebx
 
-pushl x
-call add
-popl %edx
-popl %edx
-popl %edx
+
+call add_a_b
+
+
+
 mov $1, %eax
 xor %ebx, %ebx
 int $0x80

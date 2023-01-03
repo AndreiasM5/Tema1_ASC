@@ -8,7 +8,30 @@
     printeax: .asciz "Eax este egal cu %d\n"
     printadresainceputvector: .asciz "Inceputul este egal cu %d si ar trebuie sa fie 2.\n\n\n"
     printecx: .asciz "ECX este egal cu %d\n"
+    printV1: .asciz "rezultatul dupa proc = %d\n"
+    printf_nl:  .asciz "\n"
 .text
+
+calcInceputulLA:
+    # calculez -12(%ebp)- (-8(%ebp)*4-%ecx*4)*4
+    lea     -12(%ebp), %eax                 # pun adresa  -12(%ebp) in %eax
+    movl    -8(%ebp), %edx                  # pun elementul -8(%ebp) in %edx
+    shl     $2, %edx                        # fac %edx = %edx * 4
+    shl     $2, %ecx                        # fac %ecx = %ecx * 4
+    subl    %ecx, %edx                      # scad din %edx pe %ecx
+    shl     $2, %edx                        # fac %edx = %edx * 4
+    subl    %edx, %eax                      # scad din %eax pe %edx
+
+    ret
+
+printf_newline:
+    pushl   $printf_nl
+    call    printf
+    popl    %ebx
+    pushl   $0
+    call    fflush
+    popl    %ebx
+    ret
 
 .global main
 main:
@@ -142,18 +165,18 @@ xor     %ecx, %ecx
 xor     %edx, %edx
 xor     %edi, %edi
 
-lea     -12(%ebp), %eax                     # pun in %eax adresa de inceput a vectorului "plm"
+lea     -12(%ebp), %eax                      # pun in %eax adresa de inceput a vectorului "plm"
 
 for1:
 
-    pushl   %eax                      # am pus toti registrii pe stiva ca sa fac scriere
+    pushl   %eax                             # am pus toti registrii pe stiva ca sa fac scriere
     pushl   %ebx
     pushl   %ecx
     pushl   %edx
 
     xor     %ecx, %ecx
     movl    %ebx, %ecx
-    pushl   %ecx                      # printez contorul ebx din primul for
+    pushl   %ecx                             # printez contorul ebx din primul for
     pushl   $printfor1
     call    printf
     popl    %ebx
@@ -162,22 +185,22 @@ for1:
     call    fflush
     popl    %ebx
     
-    popl    %edx                     # iau registrii de pe stiva dupa scriere
+    popl    %edx                             # iau registrii de pe stiva dupa scriere
     popl    %ecx
     popl    %ebx
     popl    %eax
 
-    cmp     %ebx, -8(%ebp)                  # compar contorul ebx cu nr de noduri
+    cmp     %ebx, -8(%ebp)                   # compar contorul ebx cu nr de noduri
     je      end_for1
 
     xor     %ecx, %ecx
 for2:
 
-    pushl   %eax                            # am pus toti registrii pe stiva ca sa fac scriere
+    pushl   %eax                             # am pus toti registrii pe stiva ca sa fac scriere
     pushl   %ebx
     pushl   %ecx
     pushl   %edx
-    pushl   %ecx                            # printez ecx
+    pushl   %ecx                             # printez ecx
     pushl   $printfor2
     call    printf
     popl    %ebx
@@ -189,7 +212,7 @@ for2:
     popl    %ecx
     popl    %ebx
     popl    %eax
-    
+
     pushl   %ebx                            # am pus toti registrii pe stiva ca sa fac calculul
     pushl   %ecx
     pushl   %edx
@@ -268,11 +291,94 @@ for2:
     jmp     for2
 
 end_for2:
-    add     $1, %ebx                 # incrementez iteratorul
+    add     $1, %ebx                        # incrementez iteratorul
     jmp     for1
 
 end_for1:
 
+movl %esp, %edi                             # asta e incpeutul matricei
+
+# pasul 5
+# printare matrice de adiacenta
+
+# aloc pe stiva nr_noduri x nr_noduri
+movl    -8(%ebp), %eax
+movl    -8(%ebp), %ecx
+mull    %ecx                                # in eax am nr_noduri x nr_noduri
+xor     %ebx, %ebx
+calloc1:                                    # fac un calloc de nr_noduri x nr_noduri
+    cmp     %ebx, %eax
+    je      end_calloc1
+
+    subl     $4, %esp
+    movl     $0, (%esp)
+
+    add     $1, %ebx
+    jmp calloc1
+
+end_calloc1:
+
+
+# printez matricea
+movl    -8(%ebp), %eax
+movl    -8(%ebp), %ecx
+mull    %ecx                                # in ecx am nr_noduri x nr_noduri
+movl    %eax, %ecx
+xor     %ebx, %ebx
+
+print1:
+    cmp     %ebx, %ecx
+    je      end_print1 
+
+    pushl %edi
+    pushl %ebx                  # calculez chestie
+    pushl %ecx
+    pushl %edx
+    shl $2, %ebx                # fac ebx * 4
+    subl %ebx, %edi             # scad edi - ebx * 4 => imi rezulta o adresa ptc edx e adresa
+    movl (%edi), %eax           # iau valoarea de la adresa aia cu ()
+    popl %edx
+    popl %ecx
+    popl %ebx
+    popl %edi
+
+
+    # todo print pe rand numerele
+    pushl %edi
+    pushl %eax
+    pushl %ebx
+    pushl %ecx
+    pushl %edx
+    pushl %eax                  # chestie = edx - ebx * 4 =Eax
+    pushl $formatString
+    call printf
+    popl %edx
+    popl %edx
+    pushl $0
+    call fflush
+    popl %edx
+    popl %edx
+    popl %ecx
+    popl %ebx
+    popl %eax
+    popl %edi
+
+    pushl   %edi
+    pushl   %eax                            # sa pun pe stiva tot ca se fute
+    pushl   %ebx
+    pushl   %ecx
+    pushl   %edx
+    call printf_newline
+    popl    %edx                            # iau registrii de pe stiva
+    popl    %ecx
+    popl    %ebx
+    popl    %eax
+    popl    %edi
+
+    add     $1, %ebx
+    jmp print1
+
+end_print1:
 
     popl    %ebp
 et_exit:
