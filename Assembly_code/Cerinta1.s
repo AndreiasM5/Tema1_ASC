@@ -2,6 +2,7 @@
     x: .space 4
     formatString: .asciz "%d"
     formatPrint: .asciz "%d "
+    format_new_line: .asciz "\n"
 .text
 
 .global main
@@ -312,6 +313,36 @@ print1:
     popl %edi
 
     add     $1, %ebx
+
+    # cand ebx este multiplu de nr noduri trebuie printat un new line
+    pushl %edi
+    pushl %eax
+    pushl %ebx
+    pushl %ecx
+    pushl %edx
+
+    movl -8(%ebp), %ecx     # pun in ecx numarul de noduri
+    movl %ebx, %eax         # pun in eax contorul din print1, respectiv ebx
+    divl %ecx               # impart eax la ecx, adica contorul la numarul de noduri
+    
+    cmp $0, %edx            # compar 0 cu edx, adica restul impartirii cu 0
+    jne fara_print          # daca restul este egal cu 0 inseamana ca am contor divizibil cu nr de noduri
+
+    pushl $format_new_line
+    call printf             # printez un new line
+    popl %ebx
+    pushl $0
+    call fflush
+    popl %ebx
+
+    fara_print:
+
+    popl %edx
+    popl %ecx
+    popl %ebx
+    popl %eax
+    popl %edi
+
     jmp print1
 
 end_print1:
