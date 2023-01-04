@@ -167,6 +167,8 @@ xor     %edi, %edi
 
 lea     -12(%ebp), %eax                      # pun in %eax adresa de inceput a vectorului "plm"
 
+movl %esp, %esi
+
 for1:
 
     pushl   %eax                             # am pus toti registrii pe stiva ca sa fac scriere
@@ -296,8 +298,7 @@ end_for2:
 
 end_for1:
 
-lea (%esp), %edi                             # asta e incepeutul matricei
-
+movl %esp, %edi                             # asta e incpeutul matricei
 
 # pasul 5
 # printare matrice de adiacenta
@@ -319,60 +320,45 @@ calloc1:                                    # fac un calloc de nr_noduri x nr_no
 
 end_calloc1:
 
-# calculam pe v1
-lea     -12(%ebp), %eax
-movl    -8(%ebp), %ecx
-shl     $2 , %ecx
-subl    %ecx, %eax                      # inceputul lui v1 in eax
 
-# parcurg vectorii de adiacenta si completez matricea cu 1
+lea     -12(%ebp), %eax
+movl    -8(%ebp), %ebx              # calculez inceputul vectorului V1
+shl     $2 , %ebx
+subl    %ebx, %eax
+
 xor     %ebx, %ebx
 for3:
-    cmp     %ebx, -8(%ebp)              # ebx e contor pt nod
-    je      end_for3
+    cmp     %ebx, -8(%ebp)                   # compar contorul ebx cu nr de noduri  
+    je      end_for3                         # for de la 0 la nr de noduri
+
     xor     %ecx, %ecx
 for4:
-
-    pushl   %edi
     pushl   %eax
     pushl   %ebx
     pushl   %ecx
+
     lea     -12(%ebp), %eax             # iau adresa de inceput a vectorului de marimi
     shl     $2, %ebx                    # fac cnt_nod x 4
     subl    %ebx, %eax                  # in eax am adresa dimensiunii fiecarui vector
-    movl    (%eax), %edx                # ret in edx
+    movl    (%eax), %edx                # ret in edx dimensiunea fiecarui vector
+
     popl    %ecx
     popl    %ebx
     popl    %eax
-    popl    %edi
 
     cmp     %ecx, %edx                  # edx = lungimea fiecarui vector de adiacenta
     je      end_for4
 
-    # el curent %eax - 4 * ecx
-    # edi - 4 * (ebx * -8(%ebp) - element) -> adresa la care punem 1
-
-    pushl   %edi
     pushl   %eax
     pushl   %ebx
     pushl   %ecx
-
-    lea     -12(%ebp), %eax
-    movl    -8(%ebp), %ebx              # calculez inceputul vectorului V1
-    shl     $2 , %ebx
-    subl    %ebx, %eax
-
-    shl     $2, %ecx            # calculam elementul curent
+    shl     $2, %ecx            # calculam elementul curent el = v1 - 4 * ecx
     subl    %ecx, %eax          # ret in edx
     movl    (%eax), %edx
-
     popl    %ecx
     popl    %ebx
     popl    %eax
-    popl    %edi
 
-
-    pushl   %edi
     pushl   %eax
     pushl   %ebx
     pushl   %ecx
@@ -390,44 +376,20 @@ for4:
     popl    %ecx
     popl    %ebx
     popl    %eax
-    popl    %edi
 
-    pushl   %ecx
-    pushl   %eax
-    pushl   %edx
-    movl    %ecx, %eax
-    movl    $4, %ecx                    # restul impartirii cnt ecx la 4 sa fie 0
-    idiv    %ecx
-    movl    %edx, %esi
-    popl    %edx
-    popl    %eax
-    popl    %ecx
 
-    movl    $0, %edi
-    cmp     %edi, %esi
-    jne     wonewline
+    subl $4, %eax
+    addl $1, %ecx
+    jmp for4
 
-    pushl   %edi
-    pushl   %eax                            # sa pun pe stiva tot ca se fute
-    pushl   %ebx
-    pushl   %ecx
-    pushl   %edx
-    call printf_newline
-    popl    %edx                            # iau registrii de pe stiva
-    popl    %ecx
-    popl    %ebx
-    popl    %eax
-    popl    %edi
-
-wonewline:
-
-    add     $4, %eax
-    add     $1, %ecx
-    jmp     for4
 end_for4:
-    add     $1, %ebx
-    jmp     for3
+
+    addl $1, %ebx
+    jmp for3
+
 end_for3:
+
+
 
 # printez matricea
 movl    -8(%ebp), %eax
@@ -485,3 +447,4 @@ et_exit:
     movl    $1, %eax
     xorl    %ebx, %ebx
     int $0x80
+
