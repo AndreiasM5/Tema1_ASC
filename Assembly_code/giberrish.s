@@ -441,43 +441,6 @@ print1:
 end_print1:
 
 
-pushl $printf_nl
-call printf
-popl %edx
-pushl $0
-call fflush
-popl %edx
-
-movl    $27, %eax
-xor     %ecx, %ecx
-print_xxx:
-    cmp %ecx, %eax
-    je end_xxx
-
-    pushl %eax
-    pushl %ecx
-
-    lea (%ebp), %edx
-    shl $2, %ecx
-    subl %ecx, %edx
-    subl $4, %edx
-
-    pushl (%edx)
-    pushl $printstiva
-    call printf
-    popl %edx
-    popl %edx
-    pushl $0
-    call fflush
-    popl %edx
-    popl %ecx
-    popl %eax
-
-    add $1, %ecx
-    jmp print_xxx
-end_xxx:
-
-
     popl    %ebp
 et_exit:
     movl    $1, %eax
