@@ -1,3 +1,4 @@
+# Copyright 2023 Ivascu Ioan-Andrei (143)
 .data
     x: .space 4                     # spatiul necesar pentru un numar citit
     formatString: .asciz "%d"       # formatul de citire
