@@ -1,6 +1,58 @@
-// Copyright 2023 Ivascu Ioan-Andrei (143)
-# Tema1_ASC
-Tema 1 de laborator ASC 2022-2023
+# ASC — Liste de adiacență → matrice de adiacență
+
+Tema 1 de laborator, **cerința 1**, pentru disciplina **Arhitectura Sistemelor de Calcul (ASC / Computer Systems Architecture)**, anul universitar **2022–2023**, Facultatea de Matematică și Informatică, Universitatea din București.
+
+Program scris în **Assembly x86 pe 32 de biți, sintaxă AT&T**, care citește listele de adiacență ale unui graf orientat și afișează matricea sa de adiacență. Implementarea folosește stiva pentru stocarea datelor și apelează scanf, printf și fflush din biblioteca C.
+
+## Compilare și rulare
+
+Este necesar un mediu **Linux x86 cu suport pentru executabile pe 32 de biți**, GCC și GNU Make. Pe un Ubuntu/Debian x86-64, dependențele pot fi instalate cu:
+
+~~~bash
+sudo apt update
+sudo apt install gcc-multilib make
+make -B
+./Cerinta1 < input/input1.txt
+~~~
+
+Opțiunea -B forțează recompilarea sursei, deoarece repository-ul include și un executabil precompilat. Comanda din makefile este:
+
+~~~bash
+gcc -o Cerinta1 Cerinta1.s -m32 -no-pie
+~~~
+
+Programul folosește apelul Linux int 0x80 pentru terminare, deci GCC pentru Windows/MinGW nu este un înlocuitor direct. Pe Windows se poate folosi un mediu Linux compatibil, cum ar fi WSL cu dependențele de mai sus.
+
+## Formatul datelor
+
+- Prima valoare: 1, numărul cerinței implementate.
+- A doua valoare: N, numărul de noduri, cel mult 100.
+- Următoarele N valori: numărul vecinilor fiecărui nod.
+- Urmează vecinii nodului 0, apoi ai nodului 1 etc.; nodurile sunt numerotate de la 0 la N−1.
+- Rezultat: N rânduri a câte N valori; poziția (i, j) este 1 dacă există arcul i → j, altfel 0.
+
+Repository-ul implementează numai cerința 1; referințele la cerințele 2 și 3 din enunț fac parte din tema originală.
+
+## Fișiere
+
+| Fișier/director | Rol |
+| --- | --- |
+| Cerinta1.s | Sursa Assembly comentată |
+| makefile | Compilare cu GCC pe 32 de biți |
+| Cerinta1 | Executabilul precompilat original |
+| input/ | Trei exemple de intrare |
+| output/ | Matricele așteptate pentru exemple |
+| docs/test-report.md | Rezultatele verificării sursei originale |
+
+Numele fișierelor de ieșire păstrează forma originală: outpu1.txt, outpu2.txt și output3.txt.
+
+## Verificare
+
+**16/16 teste trecute** la compilarea și executarea sursei originale pe Linux, prin Compiler Explorer, cu GCC 13.2 și opțiunile -x assembler -m32 -no-pie. Au fost verificate cele trei exemple, noduri fără muchii, bucle, grafuri complete, limita de 100 de noduri și grafuri pseudoaleatoare cu sămânță fixă.
+
+Comparația păstrează structura matricei și ignoră numai spațiile de formatare. Testele acoperă intrări valide pentru cerința 1; nu sunt o verificare exhaustivă sau o validare a intrărilor incorecte. Execuția a fost într-un mediu Linux remote, nu nativ pe Windows. Detalii în [raportul de testare](docs/test-report.md).
+
+## Enunțul și explicațiile originale
 
 Acesta este un cod scris in Assembly x86 32-bit AT&T care primeste drept input un numar cerinta, respectiv 1,
 dupa numarul de noduri al unu graf orientat, un vector de nr_noduri elemente la care fiecare element din vector
@@ -68,3 +120,6 @@ _______________
 |      0      |                         -100(%ebp)
 |      0      |                         -104(%ebp)
 |      0      |                         -108(%ebp) - %esp
+
+---
+Copyright 2023 Ivascu Ioan-Andrei (143).
